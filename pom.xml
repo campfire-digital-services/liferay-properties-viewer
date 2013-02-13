@@ -5,8 +5,14 @@
 
 	<modelVersion>4.0.0</modelVersion>
 
+    <parent>
+        <artifactId>permeance-parent</artifactId>
+        <groupId>au.com.permeance</groupId>
+        <version>0.5</version>        
+    </parent>
+
 	<groupId>au.com.permeance.utility</groupId>
-	<artifactId>properties-helper</artifactId>
+	<artifactId>liferay-properties-viewer-portlet</artifactId>
 	<version>1.0.0.0</version>
 	<packaging>war</packaging>
 
@@ -59,6 +65,7 @@
 		</dependency>
 	</dependencies>
 
+	<!-- 
 	<repositories>
 		<repository>
 			<id>repocentral</id>
@@ -70,7 +77,7 @@
 			</snapshots>
 		</repository>
 	</repositories>
-
+    -->
 </project>
 
 
