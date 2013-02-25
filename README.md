@@ -24,7 +24,7 @@ Other users can also be assigned permissions to see the Properties Viewer Portle
 ![Properties Viewer Portlet](/doc/images/properties-viewer-screenshot.png "Properties Viewer Portlet")
 
 The view is similar to the "properties" tab under Server Administration, with two main differences:
-* users can search the property key name, to quickly browse to a known property or find available properties without browsing the portal.properties file
+* users can search the properties by key and value, to quickly browse to a known property or find available properties without browsing the portal.properties file
 * users can view the full value of a property. If the value is large, the value displayed will still be truncated but a "show" javascript link is available which will display the full value in a resizable AUI textarea.
 
 

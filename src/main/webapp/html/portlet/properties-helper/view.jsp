@@ -57,7 +57,7 @@ function propsbrowser_showsection(sectionId) {
 	<c:when test='<%= tabs3.equals("portal-properties") %>'>
 
 		<aui:form action="<%= renderURL.toString() %>" >
-			<aui:input name="term" value="<%=term %>" label="search-within-property-key" inlineLabel="left" inlineField="true"/>
+			<aui:input name="term" value="<%=term %>" label="search" inlineLabel="left" inlineField="true"/>
 			<input type="submit" value="<liferay-ui:message key='search' />"/>
 		</aui:form>
 		<br/>
@@ -78,6 +78,11 @@ function propsbrowser_showsection(sectionId) {
 			for(Object key: PropsUtil.getProperties().keySet()) {
 			    if(key.toString().toLowerCase().contains(term)) {
 			        portalProps.put(key, PropsUtil.getProperties().get(key));
+			    } else {
+			        String value = PropsUtil.get(key.toString());
+			        if(value != null && value.toLowerCase().contains(term)) {
+				        portalProps.put(key, PropsUtil.getProperties().get(key));
+			        }
 			    }
 			}
 		}
@@ -133,7 +138,7 @@ function propsbrowser_showsection(sectionId) {
 	<c:otherwise>
 	
 		<aui:form action="<%= renderURL.toString() %>" >
-			<aui:input name="term" value="<%=term %>" label="search-within-property-key" inlineLabel="left" inlineField="true"/>
+			<aui:input name="term" value="<%=term %>" label="search" inlineLabel="left" inlineField="true"/>
 			<input type="submit" value="<liferay-ui:message key='search' />"/>
 		</aui:form>
 		<br/>
@@ -153,7 +158,12 @@ function propsbrowser_showsection(sectionId) {
 		} else {
 			for(Object key: System.getProperties().keySet()) {
 			    if(key.toString().toLowerCase().contains(term)) {
-			        portalProps.put(key, System.getProperties().get(key));
+			        portalProps.put(key, System.getProperty(key.toString()));
+			    } else {
+			        String value = System.getProperty(key.toString());
+			        if(value != null && value.toLowerCase().contains(term)) {
+				        portalProps.put(key, System.getProperty(key.toString()));
+			        }
 			    }
 			}
 		}
