@@ -18,7 +18,10 @@ not, see <http://www.gnu.org/licenses/>.
 <%@page import="com.liferay.portal.kernel.util.PropsUtil"%>
 <%@page import="com.liferay.portal.kernel.dao.search.SearchContainer"%>
 <%@page import="com.liferay.portal.kernel.util.GetterUtil"%>
+<%@page import="com.liferay.portal.kernel.util.HtmlUtil"%>
 <%@page import="com.liferay.portal.kernel.util.ListUtil"%>
+<%@page import="com.liferay.portal.kernel.util.WebKeys"%>
+<%@page import="com.liferay.portal.theme.ThemeDisplay"%>
 <%@page import="org.apache.commons.lang.StringEscapeUtils" %>
 <%@page import="java.util.List" %>
 <%@page import="java.util.ArrayList" %>
@@ -29,6 +32,9 @@ not, see <http://www.gnu.org/licenses/>.
 
 
 <%
+	ThemeDisplay themeDisplay = (ThemeDisplay)request.getAttribute(WebKeys.THEME_DISPLAY);
+	pageContext.setAttribute("themeDisplay", themeDisplay); // for liferay-ui:icon-help to work
+
 	String tabs3 = GetterUtil.getString(request.getParameter("tabs3"), "");
 	String term = GetterUtil.getString(request.getParameter("term"), "").toLowerCase();
 	PortletURL portletURL = renderResponse.createRenderURL();
@@ -57,7 +63,7 @@ function propsbrowser_showsection(sectionId) {
 	<c:when test='<%= tabs3.equals("portal-properties") %>'>
 
 		<aui:form action="<%= renderURL.toString() %>" >
-			<aui:input name="term" value="<%=term %>" label="search" inlineLabel="left" inlineField="true"/>
+			<aui:input name="term" value="<%=HtmlUtil.escape(term) %>" label="search" inlineLabel="left" inlineField="true"/>
 			<input type="submit" value="<liferay-ui:message key='search' />"/>
 		</aui:form>
 		<br/>
@@ -134,11 +140,25 @@ function propsbrowser_showsection(sectionId) {
 		%>
 
 		<liferay-ui:search-iterator searchContainer="<%= searchContainer %>" />
+		
+		<portlet:resourceURL var="resourceUrl" />
+		
+		<aui:form action="${resourceUrl}" method="post">
+			<input type="hidden" name="<portlet:namespace/>search" value="<%=HtmlUtil.escape(term) %>"/>
+			<input type="hidden" name="<portlet:namespace/>exportSection" value="portal"/>
+			<input type="hidden" name="<portlet:namespace/>exportType" id="<portlet:namespace/>exportType" value="all"/>
+			<b><liferay-ui:message key='export-portal-properties:' /></b> &nbsp;&nbsp;&nbsp;
+			<input type="submit" onclick="document.getElementById('<portlet:namespace/>exportType').value = 'all';" value="<liferay-ui:message key='export-all' />"/> &nbsp;&nbsp;
+			<input type="submit" onclick="document.getElementById('<portlet:namespace/>exportType').value = 'search';" value="<liferay-ui:message key='export-search' />"/> &nbsp;&nbsp;
+			<input name="<portlet:namespace/>passwordsafe" value="true" type="checkbox" />
+			<liferay-ui:message key='password-safe' /> <liferay-ui:icon-help message="password-safe-message" />
+		</aui:form>		
+		
 	</c:when>
 	<c:otherwise>
 	
 		<aui:form action="<%= renderURL.toString() %>" >
-			<aui:input name="term" value="<%=term %>" label="search" inlineLabel="left" inlineField="true"/>
+			<aui:input name="term" value="<%=HtmlUtil.escape(term) %>" label="search" inlineLabel="left" inlineField="true"/>
 			<input type="submit" value="<liferay-ui:message key='search' />"/>
 		</aui:form>
 		<br/>
@@ -216,5 +236,19 @@ function propsbrowser_showsection(sectionId) {
 		%>
 
 		<liferay-ui:search-iterator searchContainer="<%= searchContainer %>" />
+		
+		<portlet:resourceURL var="resourceUrl" />
+		
+		<aui:form action="${resourceUrl}" method="post">
+			<input type="hidden" name="<portlet:namespace/>search" value="<%=HtmlUtil.escape(term) %>"/>
+			<input type="hidden" name="<portlet:namespace/>exportSection" value="system"/>
+			<input type="hidden" name="<portlet:namespace/>exportType" id="<portlet:namespace/>exportType" value="all"/>
+			<b><liferay-ui:message key='export-system-properties:' /></b> &nbsp;&nbsp;&nbsp;
+			<input type="submit" onclick="document.getElementById('<portlet:namespace/>exportType').value = 'all';" value="<liferay-ui:message key='export-all' />"/> &nbsp;&nbsp;
+			<input type="submit" onclick="document.getElementById('<portlet:namespace/>exportType').value = 'search';" value="<liferay-ui:message key='export-search' />"/> &nbsp;&nbsp;
+			<input name="<portlet:namespace/>passwordsafe" value="true" type="checkbox" />
+			<liferay-ui:message key='password-safe' /> <liferay-ui:icon-help message="password-safe-message" />
+		</aui:form>		
+				
 	</c:otherwise>
 </c:choose>

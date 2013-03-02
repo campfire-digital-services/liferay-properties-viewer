@@ -17,6 +17,6 @@ not, see <http://www.gnu.org/licenses/>.
 
 <display>
 	<category name="category.hidden">
-		<portlet id="properties-helper" />
+		<portlet id="properties-viewer" />
 	</category>
 </display>
