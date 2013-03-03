@@ -15,8 +15,8 @@
 package au.com.permeance.utility.propertiesviewer.portlets;
 
 import com.liferay.portal.kernel.servlet.HttpHeaders;
+import com.liferay.portal.kernel.upload.UploadPortletRequest;
 import com.liferay.portal.kernel.util.GetterUtil;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.security.permission.ActionKeys;
@@ -25,14 +25,13 @@ import com.liferay.portal.security.permission.PermissionThreadLocal;
 import com.liferay.portal.service.permission.PortletPermissionUtil;
 import com.liferay.portal.theme.PortletDisplay;
 import com.liferay.portal.theme.ThemeDisplay;
+import com.liferay.portal.util.PortalUtil;
 import com.liferay.util.bridges.mvc.MVCPortlet;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.Enumeration;
 import java.util.Properties;
-import java.util.Set;
-import java.util.TreeSet;
 
 import javax.portlet.PortletException;
 import javax.portlet.RenderRequest;
@@ -42,15 +41,37 @@ import javax.portlet.ResourceResponse;
 
 public class PropertiesViewerPortlet extends MVCPortlet {
 
-    public static final String VIEW_PAGE = "/html/portlet/properties-helper/view.jsp";
+    private static final String VIEW_PAGE = "/html/portlet/properties-helper/view.jsp";
+
+    public static final String PARAM_EXPORTTYPE = "exportType";
+    public static final String PARAM_EXPORTSECTION = "exportSection";
+    public static final String PARAM_SEARCH = "search";
+    public static final String PARAM_PASSWORDSAFE = "passwordsafe";
+    public static final String PARAM_FILE = "file";
+
+    public static final String SECTION_SYSTEM = "system";
+    public static final String SECTION_PORTAL = "portal";
+    public static final String SECTION_UPLOAD = "upload";
+
+    public static final String TYPE_ALL = "all";
+    public static final String TYPE_SEARCH = "search";
+
+    private static final String FILE_FORMATTED = "formatted";
+    private static final String FILE_SEARCH = ".search";
+    private static final String FILE_PASSWORDSAFE = ".passwordsafe";
+
+    private static final String EXCEPTION_INVALID_OPERATION = "Invalid Operation";
+    private static final String PROPERTIES_MIME_TYPE = "text/x-java-properties";
+    private static final String CACHE_HEADER_VALUE = "no-cache, no-store";
 
     @Override
-    public void doView(RenderRequest renderRequest, RenderResponse renderResponse) throws IOException, PortletException {
+    public void doView(final RenderRequest renderRequest, final RenderResponse renderResponse) throws IOException, PortletException {
         include(VIEW_PAGE, renderRequest, renderResponse);
     }
 
     @Override
-    public void serveResource(ResourceRequest resourceRequest, ResourceResponse resourceResponse) throws IOException, PortletException {
+    public void serveResource(final ResourceRequest resourceRequest, final ResourceResponse resourceResponse) throws IOException,
+            PortletException {
 
         try {
             ThemeDisplay themeDisplay = (ThemeDisplay) resourceRequest.getAttribute(WebKeys.THEME_DISPLAY);
@@ -62,89 +83,85 @@ public class PropertiesViewerPortlet extends MVCPortlet {
                     && (checker.isCompanyAdmin() || checker.isOmniadmin() || PortletPermissionUtil.contains(checker, portletId,
                             ActionKeys.VIEW))) {
 
-                String exportType = GetterUtil.getString(resourceRequest.getParameter("exportType"), "all");
-                String exportSection = GetterUtil.getString(resourceRequest.getParameter("exportSection"), "system");
-                String term = GetterUtil.getString(resourceRequest.getParameter("search"), StringPool.BLANK);
-                boolean passwordSafe = GetterUtil.getBoolean(resourceRequest.getParameter("passwordsafe"), false);
+                UploadPortletRequest uploadRequest = PortalUtil.getUploadPortletRequest(resourceRequest);
 
-                String filename = "system";
-                Properties toOutput = new Properties() {
-                    // override methods so output properties file is in sorted alphabetical list
+                String exportType = GetterUtil.getString(uploadRequest.getParameter(PARAM_EXPORTTYPE), "all");
+                String exportSection = GetterUtil.getString(uploadRequest.getParameter(PARAM_EXPORTSECTION), "system");
+                String term = GetterUtil.getString(uploadRequest.getParameter(PARAM_SEARCH), StringPool.BLANK);
+                boolean passwordSafe = GetterUtil.getBoolean(uploadRequest.getParameter(PARAM_PASSWORDSAFE), false);
 
-                    @Override
-                    public Set<Object> keySet() {
-                        return Collections.unmodifiableSet(new TreeSet<Object>(super.keySet()));
-                    }
+                String filename = SECTION_SYSTEM;
+                Properties toOutput = PropertiesSearchUtil.createSortedProperties();
+                if (SECTION_SYSTEM.equals(exportSection)) {
 
-                    @Override
-                    public synchronized Enumeration<Object> keys() {
-                        return Collections.enumeration(new TreeSet<Object>(super.keySet()));
-                    }
-                };
-                if ("system".equals(exportSection)) {
-
-                    if ("all".equals(exportType) || term.length() == 0) {
-                        toOutput.putAll(System.getProperties());
+                    if (TYPE_ALL.equals(exportType) || term.length() == 0) {
+                        toOutput = PropertiesSearchUtil.searchSystemProperties(toOutput, StringPool.BLANK);
                     } else {
                         // search
-                        filename += ".search";
-                        for (Object key : System.getProperties().keySet()) {
-                            if (key.toString().toLowerCase().contains(term)) {
-                                toOutput.put(key, System.getProperty(key.toString()));
-                            } else {
-                                String value = System.getProperty(key.toString());
-                                if (value != null && value.toLowerCase().contains(term)) {
-                                    toOutput.put(key, System.getProperty(key.toString()));
+                        filename += FILE_SEARCH;
+                        toOutput = PropertiesSearchUtil.searchSystemProperties(toOutput, term);
+                    }
+                    if (passwordSafe) {
+                        filterPasswordSafe(toOutput);
+                        filename += FILE_PASSWORDSAFE;
+                    }
+                } else if (SECTION_PORTAL.equals(exportSection)) {
+                    // portal
+                    filename = SECTION_PORTAL;
+                    if (TYPE_ALL.equals(exportType) || term.length() == 0) {
+                        toOutput = PropertiesSearchUtil.searchPortalProperties(toOutput, StringPool.BLANK);
+                    } else {
+                        // search
+                        filename += FILE_SEARCH;
+                        toOutput = PropertiesSearchUtil.searchPortalProperties(toOutput, term);
+                    }
+                    if (passwordSafe) {
+                        filterPasswordSafe(toOutput);
+                        filename += FILE_PASSWORDSAFE;
+                    }
+                } else if (SECTION_UPLOAD.equals(exportSection)) {
+                    // uploaded
+                    filename = FILE_FORMATTED;
+                    File uploaded = uploadRequest.getFile(PARAM_FILE);
+                    if (uploaded != null) {
+                        FileInputStream fis = new FileInputStream(uploaded);
+                        try {
+                            toOutput.load(fis);
+                        } finally {
+                            try {
+                                if (fis != null) {
+                                    fis.close();
                                 }
+                            } catch (Exception e) {
                             }
                         }
                     }
                 } else {
-                    // portal
-                    filename = "portal";
-                    if ("all".equals(exportType) || term.length() == 0) {
-                        toOutput.putAll(PropsUtil.getProperties());
-                    } else {
-                        // search
-                        filename += ".search";
-                        for (Object key : PropsUtil.getProperties().keySet()) {
-                            if (key.toString().toLowerCase().contains(term)) {
-                                toOutput.put(key, PropsUtil.getProperties().get(key));
-                            } else {
-                                String value = PropsUtil.get(key.toString());
-                                if (value != null && value.toLowerCase().contains(term)) {
-                                    toOutput.put(key, PropsUtil.getProperties().get(key));
-                                }
-                            }
-                        }
-                    }
+                    throw new PortletException(EXCEPTION_INVALID_OPERATION);
                 }
 
-                if (passwordSafe) {
-                    filterPasswordSafe(toOutput);
-                    filename += ".password-safe";
-                }
-
-                resourceResponse.setContentType("text/x-java-properties");
-                resourceResponse.addProperty(HttpHeaders.CACHE_CONTROL, "no-cache, no-store");
+                resourceResponse.setContentType(PROPERTIES_MIME_TYPE);
+                resourceResponse.addProperty(HttpHeaders.CACHE_CONTROL, CACHE_HEADER_VALUE);
                 resourceResponse.addProperty(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename + ".properties");
 
-                toOutput.store(resourceResponse.getWriter(), StringPool.BLANK);
+                toOutput.store(resourceResponse.getPortletOutputStream(), StringPool.BLANK);
             }
         } catch (IOException e) {
             throw e;
-            // } catch (PortletException e) {
-            // throw e;
+        } catch (PortletException e) {
+            throw e;
         } catch (Exception e) {
             throw new PortletException(e);
         }
-
     }
 
-    public static void filterPasswordSafe(Properties p) {
+    private static final String PASSWORD = "password";
+    private static final String PASSWORDVALUE = "********";
+
+    public static void filterPasswordSafe(final Properties p) {
         for (Object key : p.keySet()) {
-            if (key != null && key.toString().endsWith("password")) {
-                p.put(key, "********");
+            if (key != null && key.toString().toLowerCase().endsWith(PASSWORD)) {
+                p.put(key, PASSWORDVALUE);
             }
         }
     }

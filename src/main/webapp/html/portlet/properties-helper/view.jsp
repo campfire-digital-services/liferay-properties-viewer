@@ -22,11 +22,14 @@ not, see <http://www.gnu.org/licenses/>.
 <%@page import="com.liferay.portal.kernel.util.ListUtil"%>
 <%@page import="com.liferay.portal.kernel.util.WebKeys"%>
 <%@page import="com.liferay.portal.theme.ThemeDisplay"%>
+<%@page import="au.com.permeance.utility.propertiesviewer.portlets.PropertiesSearchUtil"%>
+<%@page import="au.com.permeance.utility.propertiesviewer.portlets.PropertiesViewerPortlet"%>
 <%@page import="org.apache.commons.lang.StringEscapeUtils" %>
 <%@page import="java.util.List" %>
 <%@page import="java.util.ArrayList" %>
 <%@page import="java.util.Map" %>
 <%@page import="java.util.TreeMap" %>
+<%@page import="java.util.Properties" %>
 <%@page import="javax.portlet.PortletURL" %>
 <%@ include file="init.jsp"%>
 
@@ -76,23 +79,11 @@ function propsbrowser_showsection(sectionId) {
 
 		SearchContainer searchContainer = new SearchContainer(renderRequest, null, null, SearchContainer.DEFAULT_CUR_PARAM, SearchContainer.DEFAULT_DELTA, portletURL, headerNames, null);
 
-		Map portalProps = new TreeMap();
+		Properties portalProps = PropertiesSearchUtil.createSortedProperties();
 
-		if(term.length() == 0) {		
-			portalProps.putAll(PropsUtil.getProperties());
-		} else {
-			for(Object key: PropsUtil.getProperties().keySet()) {
-			    if(key.toString().toLowerCase().contains(term)) {
-			        portalProps.put(key, PropsUtil.getProperties().get(key));
-			    } else {
-			        String value = PropsUtil.get(key.toString());
-			        if(value != null && value.toLowerCase().contains(term)) {
-				        portalProps.put(key, PropsUtil.getProperties().get(key));
-			        }
-			    }
-			}
-		}
-		List results = ListUtil.fromCollection(portalProps.entrySet());
+		portalProps = PropertiesSearchUtil.searchPortalProperties(portalProps, term);		
+		
+		List results = ListUtil.fromCollection(portalProps.entrySet());		
 
 		searchContainer.setTotal(results.size());
 
@@ -140,20 +131,27 @@ function propsbrowser_showsection(sectionId) {
 		%>
 
 		<liferay-ui:search-iterator searchContainer="<%= searchContainer %>" />
-		
+		<br/>
 		<portlet:resourceURL var="resourceUrl" />
 		
 		<aui:form action="${resourceUrl}" method="post">
-			<input type="hidden" name="<portlet:namespace/>search" value="<%=HtmlUtil.escape(term) %>"/>
-			<input type="hidden" name="<portlet:namespace/>exportSection" value="portal"/>
-			<input type="hidden" name="<portlet:namespace/>exportType" id="<portlet:namespace/>exportType" value="all"/>
-			<b><liferay-ui:message key='export-portal-properties:' /></b> &nbsp;&nbsp;&nbsp;
-			<input type="submit" onclick="document.getElementById('<portlet:namespace/>exportType').value = 'all';" value="<liferay-ui:message key='export-all' />"/> &nbsp;&nbsp;
-			<input type="submit" onclick="document.getElementById('<portlet:namespace/>exportType').value = 'search';" value="<liferay-ui:message key='export-search' />"/> &nbsp;&nbsp;
-			<input name="<portlet:namespace/>passwordsafe" value="true" type="checkbox" />
+			<input type="hidden" name="<portlet:namespace/><%=PropertiesViewerPortlet.PARAM_SEARCH %>" value="<%=HtmlUtil.escape(term) %>"/>
+			<input type="hidden" name="<portlet:namespace/><%=PropertiesViewerPortlet.PARAM_EXPORTSECTION %>" value="<%=PropertiesViewerPortlet.SECTION_PORTAL %>"/>
+			<input type="hidden" name="<portlet:namespace/><%=PropertiesViewerPortlet.PARAM_EXPORTTYPE %>" id="<portlet:namespace/><%=PropertiesViewerPortlet.PARAM_EXPORTTYPE %>" value="<%=PropertiesViewerPortlet.TYPE_ALL %>"/>
+			<b><liferay-ui:message key='export-portal-properties:' /></b> <liferay-ui:icon-help message="export-help" /> &nbsp;&nbsp;&nbsp;
+			<input type="submit" onclick="document.getElementById('<portlet:namespace/><%=PropertiesViewerPortlet.PARAM_EXPORTTYPE %>').value = '<%=PropertiesViewerPortlet.TYPE_ALL %>';" value="<liferay-ui:message key='export-all' />"/> &nbsp;&nbsp;
+			<input type="submit" onclick="document.getElementById('<portlet:namespace/><%=PropertiesViewerPortlet.PARAM_EXPORTTYPE %>').value = '<%=PropertiesViewerPortlet.TYPE_SEARCH %>';" value="<liferay-ui:message key='export-search' />"/> &nbsp;&nbsp;
+			<input name="<portlet:namespace/><%=PropertiesViewerPortlet.PARAM_PASSWORDSAFE %>" value="true" type="checkbox" />
 			<liferay-ui:message key='password-safe' /> <liferay-ui:icon-help message="password-safe-message" />
 		</aui:form>		
-		
+		<br/>
+		<aui:form action="${resourceUrl}" method="post" enctype="multipart/form-data">
+			<input type="hidden" name="<portlet:namespace/><%=PropertiesViewerPortlet.PARAM_EXPORTSECTION %>" value="<%=PropertiesViewerPortlet.SECTION_UPLOAD %>"/>
+			<b><liferay-ui:message key='format-properties:' /></b> <liferay-ui:icon-help message="format-properties-help" /> &nbsp;&nbsp;&nbsp;
+			<aui:input name="<%=PropertiesViewerPortlet.PARAM_FILE %>" type="file" style="width: auto;" label="file" inlineLabel="left" inlineField="true" />
+			<input type="submit"  value="<liferay-ui:message key='format' />"/> &nbsp;&nbsp;
+		</aui:form>
+				
 	</c:when>
 	<c:otherwise>
 	
@@ -171,22 +169,9 @@ function propsbrowser_showsection(sectionId) {
 
 		SearchContainer searchContainer = new SearchContainer(renderRequest, null, null, SearchContainer.DEFAULT_CUR_PARAM, SearchContainer.DEFAULT_DELTA, portletURL, headerNames, null);
 
-		Map portalProps = new TreeMap();
+		Properties portalProps = PropertiesSearchUtil.createSortedProperties();
 
-		if(term.length() == 0) {		
-			portalProps.putAll(System.getProperties());
-		} else {
-			for(Object key: System.getProperties().keySet()) {
-			    if(key.toString().toLowerCase().contains(term)) {
-			        portalProps.put(key, System.getProperty(key.toString()));
-			    } else {
-			        String value = System.getProperty(key.toString());
-			        if(value != null && value.toLowerCase().contains(term)) {
-				        portalProps.put(key, System.getProperty(key.toString()));
-			        }
-			    }
-			}
-		}
+		portalProps = PropertiesSearchUtil.searchSystemProperties(portalProps, term);
 
 		List results = ListUtil.fromCollection(portalProps.entrySet());
 
@@ -236,19 +221,26 @@ function propsbrowser_showsection(sectionId) {
 		%>
 
 		<liferay-ui:search-iterator searchContainer="<%= searchContainer %>" />
-		
+		<br/>
 		<portlet:resourceURL var="resourceUrl" />
 		
 		<aui:form action="${resourceUrl}" method="post">
-			<input type="hidden" name="<portlet:namespace/>search" value="<%=HtmlUtil.escape(term) %>"/>
-			<input type="hidden" name="<portlet:namespace/>exportSection" value="system"/>
-			<input type="hidden" name="<portlet:namespace/>exportType" id="<portlet:namespace/>exportType" value="all"/>
-			<b><liferay-ui:message key='export-system-properties:' /></b> &nbsp;&nbsp;&nbsp;
-			<input type="submit" onclick="document.getElementById('<portlet:namespace/>exportType').value = 'all';" value="<liferay-ui:message key='export-all' />"/> &nbsp;&nbsp;
-			<input type="submit" onclick="document.getElementById('<portlet:namespace/>exportType').value = 'search';" value="<liferay-ui:message key='export-search' />"/> &nbsp;&nbsp;
-			<input name="<portlet:namespace/>passwordsafe" value="true" type="checkbox" />
+			<input type="hidden" name="<portlet:namespace/><%=PropertiesViewerPortlet.PARAM_SEARCH %>" value="<%=HtmlUtil.escape(term) %>"/>
+			<input type="hidden" name="<portlet:namespace/><%=PropertiesViewerPortlet.PARAM_EXPORTSECTION %>" value="<%=PropertiesViewerPortlet.SECTION_SYSTEM %>"/>
+			<input type="hidden" name="<portlet:namespace/><%=PropertiesViewerPortlet.PARAM_EXPORTTYPE %>" id="<portlet:namespace/><%=PropertiesViewerPortlet.PARAM_EXPORTTYPE %>" value="<%=PropertiesViewerPortlet.TYPE_ALL %>"/>
+			<b><liferay-ui:message key='export-system-properties:' /></b> <liferay-ui:icon-help message="export-help" /> &nbsp;&nbsp;&nbsp;
+			<input type="submit" onclick="document.getElementById('<portlet:namespace/><%=PropertiesViewerPortlet.PARAM_EXPORTTYPE %>').value = '<%=PropertiesViewerPortlet.TYPE_ALL %>';" value="<liferay-ui:message key='export-all' />"/> &nbsp;&nbsp;
+			<input type="submit" onclick="document.getElementById('<portlet:namespace/><%=PropertiesViewerPortlet.PARAM_EXPORTTYPE %>').value = '<%=PropertiesViewerPortlet.TYPE_SEARCH %>';" value="<liferay-ui:message key='export-search' />"/> &nbsp;&nbsp;
+			<input name="<portlet:namespace/><%=PropertiesViewerPortlet.PARAM_PASSWORDSAFE %>" value="true" type="checkbox" />
 			<liferay-ui:message key='password-safe' /> <liferay-ui:icon-help message="password-safe-message" />
 		</aui:form>		
+		<br/>
+		<aui:form action="${resourceUrl}" method="post" enctype="multipart/form-data">
+			<input type="hidden" name="<portlet:namespace/><%=PropertiesViewerPortlet.PARAM_EXPORTSECTION %>" value="<%=PropertiesViewerPortlet.SECTION_UPLOAD %>"/>
+			<b><liferay-ui:message key='format-properties:' /></b> <liferay-ui:icon-help message="format-properties-help" /> &nbsp;&nbsp;&nbsp;
+			<aui:input name="<%=PropertiesViewerPortlet.PARAM_FILE %>" type="file" style="width: auto;" label="file" inlineLabel="left" inlineField="true" />
+			<input type="submit"  value="<liferay-ui:message key='format' />"/> &nbsp;&nbsp;
+		</aui:form>
 				
 	</c:otherwise>
 </c:choose>
