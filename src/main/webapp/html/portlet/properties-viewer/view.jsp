@@ -23,7 +23,7 @@ not, see <http://www.gnu.org/licenses/>.
 <%@page import="com.liferay.portal.kernel.util.WebKeys"%>
 <%@page import="com.liferay.portal.theme.ThemeDisplay"%>
 <%@page import="au.com.permeance.utility.propertiesviewer.portlets.PropertiesSearchUtil"%>
-<%@page import="au.com.permeance.utility.propertiesviewer.portlets.PropertiesViewerPortlet"%>
+<%@page import="au.com.permeance.utility.propertiesviewer.portlets.PropertiesViewerConstants"%>
 <%@page import="org.apache.commons.lang.StringEscapeUtils" %>
 <%@page import="java.util.List" %>
 <%@page import="java.util.ArrayList" %>
@@ -103,13 +103,21 @@ function propsbrowser_showsection(sectionId) {
 
 			// Property
 			
-			row.addText(StringEscapeUtils.escapeHtml(property));
+			String propertyDisp = StringEscapeUtils.escapeHtml(property);
+			if(term != null && term.length() > 0) {
+			    propertyDisp = propertyDisp.replace(term, "<span style=\"background-color: yellow\">" + term + "</span>");
+			}
+			row.addText(propertyDisp);
 
 			// Value
 
 			if(value.length() > 80) {
 				StringBuilder builder = new StringBuilder();
-				builder.append(StringEscapeUtils.escapeHtml(StringUtil.shorten(value, 80)));
+				String valueDisp = StringEscapeUtils.escapeHtml(StringUtil.shorten(value, 80));
+				if(term != null && term.length() > 0) {
+				    valueDisp = valueDisp.replace(term, "<span style=\"background-color: yellow\">" + term + "</span>");
+				}
+				builder.append(valueDisp);
 				builder.append("<a href='#' onclick=\"propsbrowser_showsection('propsbrowser_section");
 				builder.append(Integer.toString(sectionId));
 				builder.append("'); return false;\">show</a><br/>");
@@ -121,7 +129,11 @@ function propsbrowser_showsection(sectionId) {
 				row.addText(builder.toString());
 				sectionId++;
 			} else {
-				row.addText(StringEscapeUtils.escapeHtml(value));
+				String valueDisp = StringEscapeUtils.escapeHtml(value);
+				if(term != null && term.length() > 0) {
+				    valueDisp = valueDisp.replace(term, "<span style=\"background-color: yellow\">" + term + "</span>");
+				}
+				row.addText(valueDisp);
 			}
 			
 			// Add result row
@@ -135,20 +147,20 @@ function propsbrowser_showsection(sectionId) {
 		<portlet:resourceURL var="resourceUrl" />
 		
 		<aui:form action="${resourceUrl}" method="post">
-			<input type="hidden" name="<portlet:namespace/><%=PropertiesViewerPortlet.PARAM_SEARCH %>" value="<%=HtmlUtil.escape(term) %>"/>
-			<input type="hidden" name="<portlet:namespace/><%=PropertiesViewerPortlet.PARAM_EXPORTSECTION %>" value="<%=PropertiesViewerPortlet.SECTION_PORTAL %>"/>
-			<input type="hidden" name="<portlet:namespace/><%=PropertiesViewerPortlet.PARAM_EXPORTTYPE %>" id="<portlet:namespace/><%=PropertiesViewerPortlet.PARAM_EXPORTTYPE %>" value="<%=PropertiesViewerPortlet.TYPE_ALL %>"/>
+			<input type="hidden" name="<portlet:namespace/><%=PropertiesViewerConstants.PARAM_SEARCH %>" value="<%=HtmlUtil.escape(term) %>"/>
+			<input type="hidden" name="<portlet:namespace/><%=PropertiesViewerConstants.PARAM_EXPORTSECTION %>" value="<%=PropertiesViewerConstants.SECTION_PORTAL %>"/>
+			<input type="hidden" name="<portlet:namespace/><%=PropertiesViewerConstants.PARAM_EXPORTTYPE %>" id="<portlet:namespace/><%=PropertiesViewerConstants.PARAM_EXPORTTYPE %>" value="<%=PropertiesViewerConstants.TYPE_ALL %>"/>
 			<b><liferay-ui:message key='export-portal-properties:' /></b> <liferay-ui:icon-help message="export-help" /> &nbsp;&nbsp;&nbsp;
-			<input type="submit" onclick="document.getElementById('<portlet:namespace/><%=PropertiesViewerPortlet.PARAM_EXPORTTYPE %>').value = '<%=PropertiesViewerPortlet.TYPE_ALL %>';" value="<liferay-ui:message key='export-all' />"/> &nbsp;&nbsp;
-			<input type="submit" onclick="document.getElementById('<portlet:namespace/><%=PropertiesViewerPortlet.PARAM_EXPORTTYPE %>').value = '<%=PropertiesViewerPortlet.TYPE_SEARCH %>';" value="<liferay-ui:message key='export-search' />"/> &nbsp;&nbsp;
-			<input name="<portlet:namespace/><%=PropertiesViewerPortlet.PARAM_PASSWORDSAFE %>" value="true" type="checkbox" />
+			<input type="submit" onclick="document.getElementById('<portlet:namespace/><%=PropertiesViewerConstants.PARAM_EXPORTTYPE %>').value = '<%=PropertiesViewerConstants.TYPE_ALL %>';" value="<liferay-ui:message key='export-all' />"/> &nbsp;&nbsp;
+			<input type="submit" onclick="document.getElementById('<portlet:namespace/><%=PropertiesViewerConstants.PARAM_EXPORTTYPE %>').value = '<%=PropertiesViewerConstants.TYPE_SEARCH %>';" value="<liferay-ui:message key='export-search' />"/> &nbsp;&nbsp;
+			<input name="<portlet:namespace/><%=PropertiesViewerConstants.PARAM_PASSWORDSAFE %>" value="true" type="checkbox" />
 			<liferay-ui:message key='password-safe' /> <liferay-ui:icon-help message="password-safe-message" />
 		</aui:form>		
 		<br/>
 		<aui:form action="${resourceUrl}" method="post" enctype="multipart/form-data">
-			<input type="hidden" name="<portlet:namespace/><%=PropertiesViewerPortlet.PARAM_EXPORTSECTION %>" value="<%=PropertiesViewerPortlet.SECTION_UPLOAD %>"/>
+			<input type="hidden" name="<portlet:namespace/><%=PropertiesViewerConstants.PARAM_EXPORTSECTION %>" value="<%=PropertiesViewerConstants.SECTION_UPLOAD %>"/>
 			<b><liferay-ui:message key='format-properties:' /></b> <liferay-ui:icon-help message="format-properties-help" /> &nbsp;&nbsp;&nbsp;
-			<aui:input name="<%=PropertiesViewerPortlet.PARAM_FILE %>" type="file" style="width: auto;" label="file" inlineLabel="left" inlineField="true" />
+			<aui:input name="<%=PropertiesViewerConstants.PARAM_FILE %>" type="file" style="width: auto;" label="file" inlineLabel="left" inlineField="true" />
 			<input type="submit"  value="<liferay-ui:message key='format' />"/> &nbsp;&nbsp;
 		</aui:form>
 				
@@ -192,18 +204,25 @@ function propsbrowser_showsection(sectionId) {
 			ResultRow row = new ResultRow(entry, property, i);
 
 			// Property
-
-			row.addText(StringEscapeUtils.escapeHtml(property));
+			String propertyDisp = StringEscapeUtils.escapeHtml(property);
+			if(term != null && term.length() > 0) {
+			    propertyDisp = propertyDisp.replace(term, "<span style=\"background-color: yellow\">" + term + "</span>");
+			}
+			row.addText(propertyDisp);
 
 			// Value
 
 			if(value.length() > 80) {
 				StringBuilder builder = new StringBuilder();
-				builder.append(StringEscapeUtils.escapeHtml(StringUtil.shorten(value, 80)));
+				String valueDisp = StringEscapeUtils.escapeHtml(StringUtil.shorten(value, 80));
+				if(term != null && term.length() > 0) {
+				    valueDisp = valueDisp.replace(term, "<span style=\"background-color: yellow\">" + term + "</span>");
+				}
+				builder.append(valueDisp);
 				builder.append("<a href='#' onclick=\"propsbrowser_showsection('propsbrowser_section");
 				builder.append(Integer.toString(sectionId));
-				builder.append("'); return false;\">show</a><br/>");
-				builder.append("<textarea style='display: none; overflow: auto' readonly id='propsbrowser_section");
+				builder.append("'); return false;\">more</a><br/>");
+				builder.append("<textarea style='display: none; overflow: auto; width: 100%;' readonly id='propsbrowser_section");
 				builder.append(Integer.toString(sectionId));
 				builder.append("'>");
 				builder.append(StringEscapeUtils.escapeHtml(value));
@@ -211,7 +230,11 @@ function propsbrowser_showsection(sectionId) {
 				row.addText(builder.toString());
 				sectionId++;
 			} else {
-				row.addText(StringEscapeUtils.escapeHtml(value));
+				String valueDisp = StringEscapeUtils.escapeHtml(value);
+				if(term != null && term.length() > 0) {
+				    valueDisp = valueDisp.replace(term, "<span style=\"background-color: yellow\">" + term + "</span>");
+				}
+				row.addText(valueDisp);
 			}			
 
 			// Add result row
@@ -225,20 +248,20 @@ function propsbrowser_showsection(sectionId) {
 		<portlet:resourceURL var="resourceUrl" />
 		
 		<aui:form action="${resourceUrl}" method="post">
-			<input type="hidden" name="<portlet:namespace/><%=PropertiesViewerPortlet.PARAM_SEARCH %>" value="<%=HtmlUtil.escape(term) %>"/>
-			<input type="hidden" name="<portlet:namespace/><%=PropertiesViewerPortlet.PARAM_EXPORTSECTION %>" value="<%=PropertiesViewerPortlet.SECTION_SYSTEM %>"/>
-			<input type="hidden" name="<portlet:namespace/><%=PropertiesViewerPortlet.PARAM_EXPORTTYPE %>" id="<portlet:namespace/><%=PropertiesViewerPortlet.PARAM_EXPORTTYPE %>" value="<%=PropertiesViewerPortlet.TYPE_ALL %>"/>
+			<input type="hidden" name="<portlet:namespace/><%=PropertiesViewerConstants.PARAM_SEARCH %>" value="<%=HtmlUtil.escape(term) %>"/>
+			<input type="hidden" name="<portlet:namespace/><%=PropertiesViewerConstants.PARAM_EXPORTSECTION %>" value="<%=PropertiesViewerConstants.SECTION_SYSTEM %>"/>
+			<input type="hidden" name="<portlet:namespace/><%=PropertiesViewerConstants.PARAM_EXPORTTYPE %>" id="<portlet:namespace/><%=PropertiesViewerConstants.PARAM_EXPORTTYPE %>" value="<%=PropertiesViewerConstants.TYPE_ALL %>"/>
 			<b><liferay-ui:message key='export-system-properties:' /></b> <liferay-ui:icon-help message="export-help" /> &nbsp;&nbsp;&nbsp;
-			<input type="submit" onclick="document.getElementById('<portlet:namespace/><%=PropertiesViewerPortlet.PARAM_EXPORTTYPE %>').value = '<%=PropertiesViewerPortlet.TYPE_ALL %>';" value="<liferay-ui:message key='export-all' />"/> &nbsp;&nbsp;
-			<input type="submit" onclick="document.getElementById('<portlet:namespace/><%=PropertiesViewerPortlet.PARAM_EXPORTTYPE %>').value = '<%=PropertiesViewerPortlet.TYPE_SEARCH %>';" value="<liferay-ui:message key='export-search' />"/> &nbsp;&nbsp;
-			<input name="<portlet:namespace/><%=PropertiesViewerPortlet.PARAM_PASSWORDSAFE %>" value="true" type="checkbox" />
+			<input type="submit" onclick="document.getElementById('<portlet:namespace/><%=PropertiesViewerConstants.PARAM_EXPORTTYPE %>').value = '<%=PropertiesViewerConstants.TYPE_ALL %>';" value="<liferay-ui:message key='export-all' />"/> &nbsp;&nbsp;
+			<input type="submit" onclick="document.getElementById('<portlet:namespace/><%=PropertiesViewerConstants.PARAM_EXPORTTYPE %>').value = '<%=PropertiesViewerConstants.TYPE_SEARCH %>';" value="<liferay-ui:message key='export-search' />"/> &nbsp;&nbsp;
+			<input name="<portlet:namespace/><%=PropertiesViewerConstants.PARAM_PASSWORDSAFE %>" value="true" type="checkbox" />
 			<liferay-ui:message key='password-safe' /> <liferay-ui:icon-help message="password-safe-message" />
 		</aui:form>		
 		<br/>
 		<aui:form action="${resourceUrl}" method="post" enctype="multipart/form-data">
-			<input type="hidden" name="<portlet:namespace/><%=PropertiesViewerPortlet.PARAM_EXPORTSECTION %>" value="<%=PropertiesViewerPortlet.SECTION_UPLOAD %>"/>
+			<input type="hidden" name="<portlet:namespace/><%=PropertiesViewerConstants.PARAM_EXPORTSECTION %>" value="<%=PropertiesViewerConstants.SECTION_UPLOAD %>"/>
 			<b><liferay-ui:message key='format-properties:' /></b> <liferay-ui:icon-help message="format-properties-help" /> &nbsp;&nbsp;&nbsp;
-			<aui:input name="<%=PropertiesViewerPortlet.PARAM_FILE %>" type="file" style="width: auto;" label="file" inlineLabel="left" inlineField="true" />
+			<aui:input name="<%=PropertiesViewerConstants.PARAM_FILE %>" type="file" style="width: auto;" label="file" inlineLabel="left" inlineField="true" />
 			<input type="submit"  value="<liferay-ui:message key='format' />"/> &nbsp;&nbsp;
 		</aui:form>
 				

@@ -39,30 +39,15 @@ import javax.portlet.RenderResponse;
 import javax.portlet.ResourceRequest;
 import javax.portlet.ResourceResponse;
 
+/**
+ * This is the main portlet class
+ * 
+ * @author Chun Ho <chun.ho@permeance.com.au>
+ * 
+ */
 public class PropertiesViewerPortlet extends MVCPortlet {
 
-    private static final String VIEW_PAGE = "/html/portlet/properties-helper/view.jsp";
-
-    public static final String PARAM_EXPORTTYPE = "exportType";
-    public static final String PARAM_EXPORTSECTION = "exportSection";
-    public static final String PARAM_SEARCH = "search";
-    public static final String PARAM_PASSWORDSAFE = "passwordsafe";
-    public static final String PARAM_FILE = "file";
-
-    public static final String SECTION_SYSTEM = "system";
-    public static final String SECTION_PORTAL = "portal";
-    public static final String SECTION_UPLOAD = "upload";
-
-    public static final String TYPE_ALL = "all";
-    public static final String TYPE_SEARCH = "search";
-
-    private static final String FILE_FORMATTED = "formatted";
-    private static final String FILE_SEARCH = ".search";
-    private static final String FILE_PASSWORDSAFE = ".passwordsafe";
-
-    private static final String EXCEPTION_INVALID_OPERATION = "Invalid Operation";
-    private static final String PROPERTIES_MIME_TYPE = "text/x-java-properties";
-    private static final String CACHE_HEADER_VALUE = "no-cache, no-store";
+    private static final String VIEW_PAGE = "/html/portlet/properties-viewer/view.jsp";
 
     @Override
     public void doView(final RenderRequest renderRequest, final RenderResponse renderResponse) throws IOException, PortletException {
@@ -85,44 +70,46 @@ public class PropertiesViewerPortlet extends MVCPortlet {
 
                 UploadPortletRequest uploadRequest = PortalUtil.getUploadPortletRequest(resourceRequest);
 
-                String exportType = GetterUtil.getString(uploadRequest.getParameter(PARAM_EXPORTTYPE), "all");
-                String exportSection = GetterUtil.getString(uploadRequest.getParameter(PARAM_EXPORTSECTION), "system");
-                String term = GetterUtil.getString(uploadRequest.getParameter(PARAM_SEARCH), StringPool.BLANK);
-                boolean passwordSafe = GetterUtil.getBoolean(uploadRequest.getParameter(PARAM_PASSWORDSAFE), false);
+                String exportType = GetterUtil.getString(uploadRequest.getParameter(PropertiesViewerConstants.PARAM_EXPORTTYPE), "all");
+                String exportSection = GetterUtil.getString(uploadRequest.getParameter(PropertiesViewerConstants.PARAM_EXPORTSECTION),
+                        "system");
+                String term = GetterUtil.getString(uploadRequest.getParameter(PropertiesViewerConstants.PARAM_SEARCH), StringPool.BLANK);
+                boolean passwordSafe = GetterUtil.getBoolean(uploadRequest.getParameter(PropertiesViewerConstants.PARAM_PASSWORDSAFE),
+                        false);
 
-                String filename = SECTION_SYSTEM;
+                String filename = PropertiesViewerConstants.SECTION_SYSTEM;
                 Properties toOutput = PropertiesSearchUtil.createSortedProperties();
-                if (SECTION_SYSTEM.equals(exportSection)) {
+                if (PropertiesViewerConstants.SECTION_SYSTEM.equals(exportSection)) {
 
-                    if (TYPE_ALL.equals(exportType) || term.length() == 0) {
+                    if (PropertiesViewerConstants.TYPE_ALL.equals(exportType) || term.length() == 0) {
                         toOutput = PropertiesSearchUtil.searchSystemProperties(toOutput, StringPool.BLANK);
                     } else {
                         // search
-                        filename += FILE_SEARCH;
+                        filename += PropertiesViewerConstants.FILE_SEARCH;
                         toOutput = PropertiesSearchUtil.searchSystemProperties(toOutput, term);
                     }
                     if (passwordSafe) {
                         filterPasswordSafe(toOutput);
-                        filename += FILE_PASSWORDSAFE;
+                        filename += PropertiesViewerConstants.FILE_PASSWORDSAFE;
                     }
-                } else if (SECTION_PORTAL.equals(exportSection)) {
+                } else if (PropertiesViewerConstants.SECTION_PORTAL.equals(exportSection)) {
                     // portal
-                    filename = SECTION_PORTAL;
-                    if (TYPE_ALL.equals(exportType) || term.length() == 0) {
+                    filename = PropertiesViewerConstants.SECTION_PORTAL;
+                    if (PropertiesViewerConstants.TYPE_ALL.equals(exportType) || term.length() == 0) {
                         toOutput = PropertiesSearchUtil.searchPortalProperties(toOutput, StringPool.BLANK);
                     } else {
                         // search
-                        filename += FILE_SEARCH;
+                        filename += PropertiesViewerConstants.FILE_SEARCH;
                         toOutput = PropertiesSearchUtil.searchPortalProperties(toOutput, term);
                     }
                     if (passwordSafe) {
                         filterPasswordSafe(toOutput);
-                        filename += FILE_PASSWORDSAFE;
+                        filename += PropertiesViewerConstants.FILE_PASSWORDSAFE;
                     }
-                } else if (SECTION_UPLOAD.equals(exportSection)) {
+                } else if (PropertiesViewerConstants.SECTION_UPLOAD.equals(exportSection)) {
                     // uploaded
-                    filename = FILE_FORMATTED;
-                    File uploaded = uploadRequest.getFile(PARAM_FILE);
+                    filename = PropertiesViewerConstants.FILE_FORMATTED;
+                    File uploaded = uploadRequest.getFile(PropertiesViewerConstants.PARAM_FILE);
                     if (uploaded != null) {
                         FileInputStream fis = new FileInputStream(uploaded);
                         try {
@@ -137,11 +124,11 @@ public class PropertiesViewerPortlet extends MVCPortlet {
                         }
                     }
                 } else {
-                    throw new PortletException(EXCEPTION_INVALID_OPERATION);
+                    throw new PortletException(PropertiesViewerConstants.EXCEPTION_INVALID_OPERATION);
                 }
 
-                resourceResponse.setContentType(PROPERTIES_MIME_TYPE);
-                resourceResponse.addProperty(HttpHeaders.CACHE_CONTROL, CACHE_HEADER_VALUE);
+                resourceResponse.setContentType(PropertiesViewerConstants.PROPERTIES_MIME_TYPE);
+                resourceResponse.addProperty(HttpHeaders.CACHE_CONTROL, PropertiesViewerConstants.CACHE_HEADER_VALUE);
                 resourceResponse.addProperty(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename + ".properties");
 
                 toOutput.store(resourceResponse.getPortletOutputStream(), StringPool.BLANK);
@@ -155,13 +142,10 @@ public class PropertiesViewerPortlet extends MVCPortlet {
         }
     }
 
-    private static final String PASSWORD = "password";
-    private static final String PASSWORDVALUE = "********";
-
     public static void filterPasswordSafe(final Properties p) {
         for (Object key : p.keySet()) {
-            if (key != null && key.toString().toLowerCase().endsWith(PASSWORD)) {
-                p.put(key, PASSWORDVALUE);
+            if (key != null && key.toString().toLowerCase().endsWith(PropertiesViewerConstants.PASSWORD)) {
+                p.put(key, PropertiesViewerConstants.PASSWORDVALUE);
             }
         }
     }

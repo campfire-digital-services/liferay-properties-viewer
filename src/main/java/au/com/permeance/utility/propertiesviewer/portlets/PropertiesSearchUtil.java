@@ -25,9 +25,15 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+/**
+ * This class provides utility methods
+ * 
+ * @author Chun Ho <chun.ho@permeance.com.au>
+ * 
+ */
 public class PropertiesSearchUtil {
 
-    public static Properties searchSystemProperties(final Properties result, final String term) {
+    public static Properties searchProperties(final Properties result, final String term, final Properties poolToSearch) {
         Properties toReturn = null;
         if (result == null) {
             toReturn = new Properties();
@@ -35,15 +41,15 @@ public class PropertiesSearchUtil {
             toReturn = result;
         }
         if (term == null || term.length() == 0) {
-            toReturn.putAll(System.getProperties());
+            toReturn.putAll(poolToSearch);
         } else {
-            for (Object key : System.getProperties().keySet()) {
+            for (Object key : poolToSearch.keySet()) {
                 if (key.toString().toLowerCase().contains(term)) {
-                    toReturn.put(key, System.getProperty(key.toString()));
+                    toReturn.put(key, poolToSearch.getProperty(key.toString()));
                 } else {
-                    String value = System.getProperty(key.toString());
+                    String value = poolToSearch.getProperty(key.toString());
                     if (value != null && value.toLowerCase().contains(term)) {
-                        toReturn.put(key, System.getProperty(key.toString()));
+                        toReturn.put(key, poolToSearch.getProperty(key.toString()));
                     }
                 }
             }
@@ -51,28 +57,12 @@ public class PropertiesSearchUtil {
         return toReturn;
     }
 
+    public static Properties searchSystemProperties(final Properties result, final String term) {
+        return searchProperties(result, term, System.getProperties());
+    }
+
     public static Properties searchPortalProperties(final Properties result, final String term) {
-        Properties toReturn = null;
-        if (result == null) {
-            toReturn = new Properties();
-        } else {
-            toReturn = result;
-        }
-        if (term == null || term.length() == 0) {
-            toReturn.putAll(PropsUtil.getProperties());
-        } else {
-            for (Object key : PropsUtil.getProperties().keySet()) {
-                if (key.toString().toLowerCase().contains(term)) {
-                    toReturn.put(key, PropsUtil.getProperties().get(key));
-                } else {
-                    String value = PropsUtil.get(key.toString());
-                    if (value != null && value.toLowerCase().contains(term)) {
-                        toReturn.put(key, PropsUtil.getProperties().get(key));
-                    }
-                }
-            }
-        }
-        return toReturn;
+        return searchProperties(result, term, PropsUtil.getProperties());
     }
 
     public static Properties createSortedProperties() {
