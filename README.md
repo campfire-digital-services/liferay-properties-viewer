@@ -15,6 +15,7 @@ This project provides an improved view for searching and browsing system and por
 
 The latest releases are available from [SourceForge](http://sourceforge.net/projects/permeance-apps/files/liferay-properties-viewer/ "Liferay Properties Viewer").
 
+Liferay instances can also download the app from [Liferay Marketplace](http://www.liferay.com/marketplace/-/mp/application/22320020 "Liferay Properties Viewer").
 
 ## Usage
 
