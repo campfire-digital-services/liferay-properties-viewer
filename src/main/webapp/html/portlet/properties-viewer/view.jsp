@@ -69,7 +69,7 @@ function propsbrowser_showsection(sectionId) {
 			<aui:input name="term" value="<%=HtmlUtil.escape(term) %>" label="search" inlineLabel="left" inlineField="true"/>
 			<input type="submit" value="<liferay-ui:message key='search' />"/>
 		</aui:form>
-		<br/>
+
 
 		<%
 		List<String> headerNames = new ArrayList<String>();
@@ -156,7 +156,7 @@ function propsbrowser_showsection(sectionId) {
 			<input name="<portlet:namespace/><%=PropertiesViewerConstants.PARAM_PASSWORDSAFE %>" value="true" type="checkbox" />
 			<liferay-ui:message key='password-safe' /> <liferay-ui:icon-help message="password-safe-message" />
 		</aui:form>		
-		<br/>
+
 		<aui:form action="${resourceUrl}" method="post" enctype="multipart/form-data">
 			<input type="hidden" name="<portlet:namespace/><%=PropertiesViewerConstants.PARAM_EXPORTSECTION %>" value="<%=PropertiesViewerConstants.SECTION_UPLOAD %>"/>
 			<b><liferay-ui:message key='format-properties:' /></b> <liferay-ui:icon-help message="format-properties-help" /> &nbsp;&nbsp;&nbsp;
@@ -171,7 +171,7 @@ function propsbrowser_showsection(sectionId) {
 			<aui:input name="term" value="<%=HtmlUtil.escape(term) %>" label="search" inlineLabel="left" inlineField="true"/>
 			<input type="submit" value="<liferay-ui:message key='search' />"/>
 		</aui:form>
-		<br/>
+
 
 		<%
 		List<String> headerNames = new ArrayList<String>();
@@ -257,7 +257,7 @@ function propsbrowser_showsection(sectionId) {
 			<input name="<portlet:namespace/><%=PropertiesViewerConstants.PARAM_PASSWORDSAFE %>" value="true" type="checkbox" />
 			<liferay-ui:message key='password-safe' /> <liferay-ui:icon-help message="password-safe-message" />
 		</aui:form>		
-		<br/>
+
 		<aui:form action="${resourceUrl}" method="post" enctype="multipart/form-data">
 			<input type="hidden" name="<portlet:namespace/><%=PropertiesViewerConstants.PARAM_EXPORTSECTION %>" value="<%=PropertiesViewerConstants.SECTION_UPLOAD %>"/>
 			<b><liferay-ui:message key='format-properties:' /></b> <liferay-ui:icon-help message="format-properties-help" /> &nbsp;&nbsp;&nbsp;
