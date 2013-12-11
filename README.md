@@ -9,6 +9,8 @@ This project provides an improved view for searching and browsing system and por
 
 * Liferay Portal 6.1 CE GA2, GA3 (6.1.1+)
 * Liferay Portal 6.1 EE GA2, GA3 (6.1.20+)
+* Liferay Portal 6.2 CE GA1 (6.2.0+)
+* Liferay Portal 6.2 EE GA1 (6.2.10+)
 
 
 ## Downloads
@@ -19,10 +21,13 @@ Liferay instances can also download the app from [Liferay Marketplace](http://ww
 
 ## Usage
 
-Administrators will see a "Properties Viewer" portlet in the Server area of the Control Panel.
+Administrators will see a "Properties Viewer" portlet in the Server area of the Control Panel in 6.1.
+In 6.2, the portlet is under the Apps section of the Control Panel.
 Other users can also be assigned permissions to see the Properties Viewer Portlet.
 
 ![Properties Viewer Portlet](/doc/images/properties-viewer-screenshot.png "Properties Viewer Portlet")
+
+![Properties Viewer Portlet](/doc/images/properties-searcher-6.2.png "Properties Viewer Portlet")
 
 The view is similar to the "properties" tab under Server Administration, with two main differences:
 * users can search the properties by key and value, to quickly browse to a known property or find available properties without browsing the portal.properties file
@@ -57,6 +62,9 @@ This will build "liferay-properties-viewer-portlet-XXX.war" in the targets tolde
 
 NOTE: You will require JDK 1.6+ and Maven 3.
 
+Branch 6.1.x contains code for Liferay 6.1. 
+Branch 6.2.x contains code for Liferay 6.2.
+Master is sync'ed with branch 6.2.x.
 
 ## Installation
 
@@ -64,7 +72,7 @@ NOTE: You will require JDK 1.6+ and Maven 3.
 
 eg.
 
-Deploy "liferay-properties-viewer-portlet-1.0.0.0.war" to "LIFERAY_HOME/deploy" folder.
+Deploy "liferay-properties-viewer-portlet-LPX.X-X.X.X.X.war" to "LIFERAY_HOME/deploy" folder.
 
 ## License
 
