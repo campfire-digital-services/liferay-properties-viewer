@@ -62,6 +62,8 @@ function propsbrowser_showsection(sectionId) {
 	url="<%=portletURL.toString() %>"
 />
 
+<div class="__properties_viewer">
+
 <c:choose>
 	<c:when test='<%= tabs3.equals("portal-properties") %>'>
 
@@ -99,7 +101,7 @@ function propsbrowser_showsection(sectionId) {
 			String property = (String)entry.getKey();
 			String value = (String)entry.getValue();
 
-			ResultRow row = new ResultRow(entry, property, i);
+			ResultRow row = new com.liferay.taglib.search.ResultRow(entry, property, i);
 
 			// Property
 			
@@ -201,7 +203,7 @@ function propsbrowser_showsection(sectionId) {
 			String property = (String)entry.getKey();
 			String value = (String)entry.getValue();
 
-			ResultRow row = new ResultRow(entry, property, i);
+			ResultRow row = new com.liferay.taglib.search.ResultRow(entry, property, i);
 
 			// Property
 			String propertyDisp = StringEscapeUtils.escapeHtml(property);
@@ -267,3 +269,4 @@ function propsbrowser_showsection(sectionId) {
 				
 	</c:otherwise>
 </c:choose>
+</div>

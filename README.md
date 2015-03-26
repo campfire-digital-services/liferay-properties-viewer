@@ -11,7 +11,7 @@ This project provides an improved view for searching and browsing system and por
 * Liferay Portal 6.1 EE GA2, GA3 (6.1.20+)
 * Liferay Portal 6.2 CE GA1 (6.2.0+)
 * Liferay Portal 6.2 EE GA1 (6.2.10+)
-
+* Liferay Portal 7.0 CE M4 (7.0.0+)
 
 ## Downloads
 
@@ -22,7 +22,7 @@ Liferay instances can also download the app from [Liferay Marketplace](http://ww
 ## Usage
 
 Administrators will see a "Properties Viewer" portlet in the Server area of the Control Panel in 6.1.
-In 6.2, the portlet is under the Apps section of the Control Panel.
+In 6.2 and 7.0, the portlet is under the Apps section of the Control Panel.
 Other users can also be assigned permissions to see the Properties Viewer Portlet.
 
 ![Properties Viewer Portlet](/doc/images/properties-viewer-screenshot.png "Properties Viewer Portlet")
@@ -64,7 +64,8 @@ NOTE: You will require JDK 1.6+ and Maven 3.
 
 Branch 6.1.x contains code for Liferay 6.1. 
 Branch 6.2.x contains code for Liferay 6.2.
-Master is sync'ed with branch 6.2.x.
+Branch 7.0.x contains code for Liferay 7.0.
+Master is sync'ed with branch 7.0.x.
 
 ## Installation
 

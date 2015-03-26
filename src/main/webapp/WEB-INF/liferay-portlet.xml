@@ -22,6 +22,7 @@ not, see <http://www.gnu.org/licenses/>.
 		<control-panel-entry-category>server</control-panel-entry-category>
 		<control-panel-entry-weight>1.1</control-panel-entry-weight>
 		<instanceable>false</instanceable>
+		<header-portlet-css>/html/portlet/properties-viewer/main.css</header-portlet-css>
 	</portlet>
 	<role-mapper>
 		<role-name>administrator</role-name>
